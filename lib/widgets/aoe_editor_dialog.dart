@@ -155,6 +155,13 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
           ],
         ),
       ),
+      // Nota: AlertDialog dispone `actions` con un OverflowBar, non con una
+      // Row/Flex: Spacer/Expanded come figli diretti causano un errore di
+      // ParentData incompatibile (visibile come schermo grigio nelle build
+      // web release). Per allineare "Elimina" a sinistra e il resto a
+      // destra usiamo `actionsAlignment` più un raggruppamento in una Row
+      // interna (quella sì è un vero Flex, quindi sicura).
+      actionsAlignment: MainAxisAlignment.spaceBetween,
       actions: [
         TextButton.icon(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
@@ -167,24 +174,29 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
             Navigator.of(context).pop();
           },
         ),
-        const Spacer(),
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Annulla'),
-        ),
-        FilledButton(
-          onPressed: () {
-            map.updateAoE(
-              widget.aoeId,
-              sizeCells: _sizeCells,
-              color: _color,
-              label: _labelController.text.trim().isEmpty
-                  ? null
-                  : _labelController.text.trim(),
-            );
-            Navigator.of(context).pop();
-          },
-          child: const Text('Salva'),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annulla'),
+            ),
+            const SizedBox(width: 8),
+            FilledButton(
+              onPressed: () {
+                map.updateAoE(
+                  widget.aoeId,
+                  sizeCells: _sizeCells,
+                  color: _color,
+                  label: _labelController.text.trim().isEmpty
+                      ? null
+                      : _labelController.text.trim(),
+                );
+                Navigator.of(context).pop();
+              },
+              child: const Text('Salva'),
+            ),
+          ],
         ),
       ],
     );
