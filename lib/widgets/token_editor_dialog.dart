@@ -17,16 +17,39 @@ class _TokenEditorDialogState extends State<TokenEditorDialog> {
   late TokenCategory _category;
   late TokenSize _size;
 
+  /// Se il token non esiste più (es. eliminato da un'altra parte
+  /// dell'interfaccia mentre il dialog era aperto) evitiamo di lanciare
+  /// un'eccezione durante il build: chiudiamo il dialog al frame
+  /// successivo invece di mostrare un contenuto rotto.
+  bool _missing = false;
+
   @override
   void initState() {
     super.initState();
     final map = context.read<MapState>();
-    final token = map.tokens.firstWhere((t) => t.id == widget.tokenId);
+    TokenData? token;
+    for (final t in map.tokens) {
+      if (t.id == widget.tokenId) {
+        token = t;
+        break;
+      }
+    }
+    if (token == null) {
+      _missing = true;
+      _nameController = TextEditingController();
+      _descController = TextEditingController();
+      _category = TokenCategory.player;
+      _size = TokenSize.medium;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+      return;
+    }
     _nameController = TextEditingController(text: token.name);
     _descController = TextEditingController(text: token.description);
     _category = token.category;
     _size = TokenSize.values.firstWhere(
-      (s) => s.cells == token.sizeCells,
+      (s) => s.cells == token!.sizeCells,
       orElse: () => TokenSize.medium,
     );
   }
@@ -40,6 +63,11 @@ class _TokenEditorDialogState extends State<TokenEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    if (_missing) {
+      // Contenuto minimo in attesa della chiusura programmata sopra.
+      return const AlertDialog(content: SizedBox(height: 0, width: 0));
+    }
+
     final map = context.read<MapState>();
 
     return AlertDialog(
@@ -65,7 +93,10 @@ class _TokenEditorDialogState extends State<TokenEditorDialog> {
             const SizedBox(height: 12),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text('Categoria', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Categoria',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 6),
             Wrap(
@@ -83,7 +114,10 @@ class _TokenEditorDialogState extends State<TokenEditorDialog> {
             const SizedBox(height: 12),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text('Taglia (D&D 5e)', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Taglia (D&D 5e)',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 6),
             Wrap(
@@ -103,7 +137,10 @@ class _TokenEditorDialogState extends State<TokenEditorDialog> {
       actions: [
         TextButton.icon(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          label: const Text('Elimina', style: TextStyle(color: Colors.redAccent)),
+          label: const Text(
+            'Elimina',
+            style: TextStyle(color: Colors.redAccent),
+          ),
           onPressed: () {
             map.removeToken(widget.tokenId);
             Navigator.of(context).pop();

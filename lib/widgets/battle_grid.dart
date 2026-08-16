@@ -4,11 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../state/map_state.dart';
-import 'aoe_editor_dialog.dart';
 import 'aoe_geometry.dart';
-import 'token_editor_dialog.dart';
 
-enum _GestureAction { none, drawing, movingToken, movingAoE, drawingAoE, panningView }
+enum _GestureAction {
+  none,
+  drawing,
+  movingToken,
+  movingAoE,
+  drawingAoE,
+  panningView,
+}
 
 class BattleGrid extends StatefulWidget {
   const BattleGrid({super.key});
@@ -261,7 +266,8 @@ class _BattleGridState extends State<BattleGrid> {
     if (_pointerPos.isEmpty) {
       if (_action == _GestureAction.movingToken && _activeTokenId != null) {
         map.snapTokenToGrid(_activeTokenId!);
-      } else if (_action == _GestureAction.drawingAoE && _aoeStartCanvas != null) {
+      } else if (_action == _GestureAction.drawingAoE &&
+          _aoeStartCanvas != null) {
         if (_aoeSizeCells > 0.3) {
           final created = map.addAoE(
             originRow: _aoeStartCanvas!.dy / map.cellSize,
@@ -302,7 +308,8 @@ class _BattleGridState extends State<BattleGrid> {
   }
 
   AoEData? _previewAoe(MapState map) {
-    if (_action != _GestureAction.drawingAoE || _aoeStartCanvas == null) return null;
+    if (_action != _GestureAction.drawingAoE || _aoeStartCanvas == null)
+      return null;
     return AoEData(
       id: '__preview__',
       shape: map.selectedAoEShape,
@@ -359,7 +366,6 @@ class _BattleGridState extends State<BattleGrid> {
                     ),
                   ),
                   ...map.tokens.map((t) => _buildToken(context, t, map)),
-                  _buildAoeControls(context, map),
                   _buildAoeMeasurementLabel(map),
                 ],
               ),
@@ -371,86 +377,82 @@ class _BattleGridState extends State<BattleGrid> {
   }
 
   Widget _buildToken(BuildContext context, TokenData t, MapState map) {
-    final topLeft = _canvasToScreen(Offset(t.col * map.cellSize, t.row * map.cellSize));
+    final topLeft = _canvasToScreen(
+      Offset(t.col * map.cellSize, t.row * map.cellSize),
+    );
     final size = t.sizeCells * map.cellSize * _scale;
     final isSelected = map.selectedTokenId == t.id;
     final showLabel = map.showTokenLabels || isSelected;
 
+    // Nota: i pulsanti di modifica/eliminazione della pedina selezionata
+    // non sono più qui come icone fluttuanti (difficili da toccare), ma
+    // nella QuickToolbar sul lato destro dello schermo.
     return Positioned(
       left: topLeft.dx,
       top: topLeft.dy,
       width: size,
       height: size,
-      child: Stack(
-        clipBehavior: Clip.none,
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: IgnorePointer(
-              child: Stack(
-                clipBehavior: Clip.none,
-                alignment: Alignment.center,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(size * 0.06),
+      child: IgnorePointer(
+        child: Padding(
+          padding: EdgeInsets.all(size * 0.06),
+          child: Container(
+            decoration: BoxDecoration(
+              color: t.category.color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected ? Colors.white : Colors.black54,
+                width: isSelected ? 3 : 1.5,
+              ),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black45,
+                  blurRadius: 3,
+                  offset: Offset(1, 1),
+                ),
+              ],
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              alignment: Alignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.contain,
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Icon(
+                      t.category.icon,
+                      color: Colors.white,
+                      size: size,
+                    ),
+                  ),
+                ),
+                if (showLabel)
+                  Positioned(
+                    top: size * 0.88,
                     child: Container(
-                      decoration: BoxDecoration(
-                        color: t.category.color,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? Colors.white : Colors.black54,
-                          width: isSelected ? 3 : 1.5,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black45, blurRadius: 3, offset: Offset(1, 1)),
-                        ],
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
                       ),
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: Padding(
-                          padding: const EdgeInsets.all(6),
-                          child: Icon(t.category.icon, color: Colors.white, size: size),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        t.name,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
-                  if (showLabel)
-                    Positioned(
-                      top: size * 0.88,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.75),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          t.name,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              ],
             ),
           ),
-          if (isSelected)
-            Positioned(
-              right: -14,
-              top: -14,
-              child: _SmallRoundButton(
-                icon: Icons.edit,
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (_) => TokenEditorDialog(tokenId: t.id),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -484,38 +486,13 @@ class _BattleGridState extends State<BattleGrid> {
           ),
           child: Text(
             '$dimensionLabel: $cellsText caselle ($metersText m)',
-            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAoeControls(BuildContext context, MapState map) {
-    final aoe = map.selectedAoE;
-    if (aoe == null) return const SizedBox.shrink();
-    final anchorScreen =
-        _canvasToScreen(Offset(aoe.originCol * map.cellSize, aoe.originRow * map.cellSize));
-
-    return Positioned(
-      left: anchorScreen.dx - 46,
-      top: anchorScreen.dy - 46,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SmallRoundButton(
-            icon: Icons.edit,
-            onTap: () => showDialog(
-              context: context,
-              builder: (_) => AoeEditorDialog(aoeId: aoe.id),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 6),
-          _SmallRoundButton(
-            icon: Icons.delete,
-            onTap: () => map.removeAoE(aoe.id),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -528,7 +505,12 @@ class _WorldPainter extends CustomPainter {
   final Offset pan;
   final AoEData? previewAoe;
 
-  _WorldPainter({required this.map, required this.scale, required this.pan, this.previewAoe});
+  _WorldPainter({
+    required this.map,
+    required this.scale,
+    required this.pan,
+    this.previewAoe,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -581,8 +563,13 @@ class _WorldPainter extends CustomPainter {
     canvas.restore();
   }
 
-  void _paintAoe(Canvas canvas, AoEData aoe, double cellSize,
-      {bool selected = false, bool preview = false}) {
+  void _paintAoe(
+    Canvas canvas,
+    AoEData aoe,
+    double cellSize, {
+    bool selected = false,
+    bool preview = false,
+  }) {
     final geometry = AoEGeometry(aoe, cellSize);
     final path = geometry.buildPath();
 
@@ -600,27 +587,4 @@ class _WorldPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _WorldPainter oldDelegate) => true;
-}
-
-class _SmallRoundButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _SmallRoundButton({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: const Color(0xFF1E1E22),
-      shape: const CircleBorder(),
-      elevation: 4,
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(icon, size: 16, color: Colors.white),
-        ),
-      ),
-    );
-  }
 }

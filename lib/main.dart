@@ -64,10 +64,19 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _dragPanel(Offset delta, Size screenSize, double panelWidth, double panelHeight) {
+  void _dragPanel(
+    Offset delta,
+    Size screenSize,
+    double panelWidth,
+    double panelHeight,
+  ) {
     final current = _panelPosition ?? const Offset(12, 84);
-    final maxX = (screenSize.width - panelWidth - 8).clamp(8, double.infinity).toDouble();
-    final maxY = (screenSize.height - panelHeight - 8).clamp(8, double.infinity).toDouble();
+    final maxX = (screenSize.width - panelWidth - 8)
+        .clamp(8, double.infinity)
+        .toDouble();
+    final maxY = (screenSize.height - panelHeight - 8)
+        .clamp(8, double.infinity)
+        .toDouble();
     setState(() {
       _panelPosition = Offset(
         (current.dx + delta.dx).clamp(8, maxX).toDouble(),
@@ -79,8 +88,9 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    final panelWidth =
-        screenSize.width - 24 < _panelWidth ? screenSize.width - 24 : _panelWidth;
+    final panelWidth = screenSize.width - 24 < _panelWidth
+        ? screenSize.width - 24
+        : _panelWidth;
     final panelHeight = (screenSize.height - 96).clamp(200, screenSize.height);
 
     // final panelTop = _fullscreen ? 12.0 : 84.0;
@@ -179,8 +189,12 @@ class _HomePageState extends State<HomePage> {
                     clipBehavior: Clip.antiAlias,
                     child: SidePanel(
                       onClose: _togglePanel,
-                      onDragHeader: (delta) =>
-                          _dragPanel(delta, screenSize, panelWidth, panelHeight.toDouble()),
+                      onDragHeader: (delta) => _dragPanel(
+                        delta,
+                        screenSize,
+                        panelWidth,
+                        panelHeight.toDouble(),
+                      ),
                     ),
                   ),
                 ),
@@ -210,11 +224,7 @@ class _RoundIconButton extends StatelessWidget {
       color: const Color(0xFF1E1E22).withOpacity(0.92),
       shape: const CircleBorder(),
       elevation: 4,
-      child: IconButton(
-        tooltip: tooltip,
-        icon: Icon(icon),
-        onPressed: onTap,
-      ),
+      child: IconButton(tooltip: tooltip, icon: Icon(icon), onPressed: onTap),
     );
   }
 }

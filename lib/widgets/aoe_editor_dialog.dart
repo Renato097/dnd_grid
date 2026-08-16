@@ -24,15 +24,40 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
   late TextEditingController _labelController;
   late double _sizeCells;
   late Color _color;
+  late AoEShape _shape;
+
+  /// Se l'AoE non esiste più (es. eliminata da un'altra parte
+  /// dell'interfaccia mentre il dialog era aperto) evitiamo di lanciare
+  /// un'eccezione durante il build: chiudiamo il dialog al frame
+  /// successivo invece di mostrare un contenuto rotto.
+  bool _missing = false;
 
   @override
   void initState() {
     super.initState();
     final map = context.read<MapState>();
-    final aoe = map.aoes.firstWhere((a) => a.id == widget.aoeId);
+    AoEData? aoe;
+    for (final a in map.aoes) {
+      if (a.id == widget.aoeId) {
+        aoe = a;
+        break;
+      }
+    }
+    if (aoe == null) {
+      _missing = true;
+      _labelController = TextEditingController();
+      _sizeCells = 1;
+      _color = const Color(0xFFFF7043);
+      _shape = AoEShape.circle;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) Navigator.of(context).pop();
+      });
+      return;
+    }
     _labelController = TextEditingController(text: aoe.label);
     _sizeCells = aoe.sizeCells;
     _color = aoe.color;
+    _shape = aoe.shape;
   }
 
   @override
@@ -43,16 +68,20 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
 
   @override
   Widget build(BuildContext context) {
+    if (_missing) {
+      // Contenuto minimo in attesa della chiusura programmata sopra.
+      return const AlertDialog(content: SizedBox(height: 0, width: 0));
+    }
+
     final map = context.read<MapState>();
-    final aoe = map.aoes.firstWhere((a) => a.id == widget.aoeId);
     final meters = (_sizeCells * map.metersPerCell).toStringAsFixed(1);
 
     return AlertDialog(
       title: Row(
         children: [
-          Icon(aoe.shape.icon, size: 20),
+          Icon(_shape.icon, size: 20),
           const SizedBox(width: 8),
-          Text('Modifica ${aoe.shape.label.toLowerCase()}'),
+          Text('Modifica ${_shape.label.toLowerCase()}'),
         ],
       ),
       content: SingleChildScrollView(
@@ -62,15 +91,17 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
           children: [
             TextField(
               controller: _labelController,
-              decoration: const InputDecoration(labelText: 'Nome (es. Palla di fuoco)'),
+              decoration: const InputDecoration(
+                labelText: 'Nome (es. Palla di fuoco)',
+              ),
             ),
             const SizedBox(height: 16),
             Text(
-              aoe.shape == AoEShape.circle
+              _shape == AoEShape.circle
                   ? 'Raggio: ${_sizeCells.toStringAsFixed(1)} caselle ($meters m)'
-                  : aoe.shape == AoEShape.cube
-                      ? 'Lato: ${_sizeCells.toStringAsFixed(1)} caselle ($meters m)'
-                      : 'Lunghezza: ${_sizeCells.toStringAsFixed(1)} caselle ($meters m)',
+                  : _shape == AoEShape.cube
+                  ? 'Lato: ${_sizeCells.toStringAsFixed(1)} caselle ($meters m)'
+                  : 'Lunghezza: ${_sizeCells.toStringAsFixed(1)} caselle ($meters m)',
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             Slider(
@@ -83,7 +114,10 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
             const SizedBox(height: 8),
             const Align(
               alignment: Alignment.centerLeft,
-              child: Text('Colore', style: TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                'Colore',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             const SizedBox(height: 6),
             Wrap(
@@ -95,7 +129,10 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
                   onTap: () => setState(() => _color = entry.value),
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 8,
+                    ),
                     decoration: BoxDecoration(
                       color: entry.value.withOpacity(0.85),
                       borderRadius: BorderRadius.circular(8),
@@ -104,8 +141,13 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
                         width: selected ? 3 : 1,
                       ),
                     ),
-                    child: Text(entry.key,
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    child: Text(
+                      entry.key,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),
@@ -116,7 +158,10 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
       actions: [
         TextButton.icon(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          label: const Text('Elimina', style: TextStyle(color: Colors.redAccent)),
+          label: const Text(
+            'Elimina',
+            style: TextStyle(color: Colors.redAccent),
+          ),
           onPressed: () {
             map.removeAoE(widget.aoeId);
             Navigator.of(context).pop();
@@ -133,7 +178,9 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
               widget.aoeId,
               sizeCells: _sizeCells,
               color: _color,
-              label: _labelController.text.trim().isEmpty ? null : _labelController.text.trim(),
+              label: _labelController.text.trim().isEmpty
+                  ? null
+                  : _labelController.text.trim(),
             );
             Navigator.of(context).pop();
           },
