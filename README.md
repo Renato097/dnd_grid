@@ -61,6 +61,8 @@ Pedina e AoE selezionate si modificano/eliminano dalla barra rapida verticale
 sulla destra dello schermo (icone ✏️ / 🗑️), pensata per essere facilmente
 raggiungibile anche col dito.
 
+---
+
 ## Progetto e dettagli Tecnici
 
 Requisiti: [Flutter SDK](https://docs.flutter.dev/get-started/install)

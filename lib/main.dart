@@ -175,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                   alignment: Alignment.topLeft,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1E1E22).withOpacity(0.97),
+                      color: const Color(0xFF1E1E22).withValues(alpha: 0.97),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: Colors.white12),
                       boxShadow: const [
@@ -221,7 +221,7 @@ class _RoundIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFF1E1E22).withOpacity(0.92),
+      color: const Color(0xFF1E1E22).withValues(alpha: 0.92),
       shape: const CircleBorder(),
       elevation: 4,
       child: IconButton(tooltip: tooltip, icon: Icon(icon), onPressed: onTap),

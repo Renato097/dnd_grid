@@ -124,7 +124,7 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
               spacing: 8,
               runSpacing: 8,
               children: kAoEColorPresets.map((entry) {
-                final selected = _color.value == entry.value.value;
+                final selected = _color.toARGB32() == entry.value.toARGB32();
                 return InkWell(
                   onTap: () => setState(() => _color = entry.value),
                   borderRadius: BorderRadius.circular(8),
@@ -134,7 +134,7 @@ class _AoeEditorDialogState extends State<AoeEditorDialog> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: entry.value.withOpacity(0.85),
+                      color: entry.value.withValues(alpha: 0.85),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: selected ? Colors.white : Colors.black26,

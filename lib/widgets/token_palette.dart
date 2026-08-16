@@ -13,7 +13,10 @@ class TokenPalette extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Pedine e segnalini', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Pedine e segnalini',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 4),
         const Text(
           'Tocca una categoria poi tocca la griglia per posizionarla. '
@@ -25,13 +28,14 @@ class TokenPalette extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: TokenCategory.values.map((cat) {
-            final selected = map.selectedTokenCategory == cat &&
+            final selected =
+                map.selectedTokenCategory == cat &&
                 map.currentTool == Tool.placeToken;
             return ChoiceChip(
               avatar: Icon(cat.icon, size: 16, color: Colors.white),
               label: Text(cat.label),
               selectedColor: cat.color,
-              backgroundColor: cat.color.withOpacity(0.35),
+              backgroundColor: cat.color.withValues(alpha: 0.35),
               labelStyle: const TextStyle(color: Colors.white),
               selected: selected,
               onSelected: (_) => map.setSelectedTokenCategory(cat),
@@ -39,7 +43,10 @@ class TokenPalette extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 10),
-        const Text('Taglia nuove pedine (D&D 5e)', style: TextStyle(fontSize: 12, color: Colors.white70)),
+        const Text(
+          'Taglia nuove pedine (D&D 5e)',
+          style: TextStyle(fontSize: 12, color: Colors.white70),
+        ),
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,

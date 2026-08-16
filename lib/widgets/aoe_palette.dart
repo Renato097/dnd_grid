@@ -14,7 +14,10 @@ class AoePalette extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Aree d\'effetto', style: TextStyle(fontWeight: FontWeight.bold)),
+        const Text(
+          'Aree d\'effetto',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 4),
         const Text(
           'Scegli una forma poi trascina sulla griglia dal punto di origine: '
@@ -27,7 +30,8 @@ class AoePalette extends StatelessWidget {
           runSpacing: 8,
           children: AoEShape.values.map((shape) {
             final selected =
-                map.selectedAoEShape == shape && map.currentTool == Tool.drawAoE;
+                map.selectedAoEShape == shape &&
+                map.currentTool == Tool.drawAoE;
             return ChoiceChip(
               avatar: Icon(shape.icon, size: 16),
               label: Text(shape.label),
@@ -37,28 +41,40 @@ class AoePalette extends StatelessWidget {
           }).toList(),
         ),
         const SizedBox(height: 10),
-        const Text('Colore', style: TextStyle(fontSize: 12, color: Colors.white70)),
+        const Text(
+          'Colore',
+          style: TextStyle(fontSize: 12, color: Colors.white70),
+        ),
         const SizedBox(height: 6),
         Wrap(
           spacing: 8,
           runSpacing: 8,
           children: kAoEColorPresets.map((entry) {
-            final selected = map.selectedAoEColor.value == entry.value.value;
+            final selected =
+                map.selectedAoEColor.toARGB32() == entry.value.toARGB32();
             return InkWell(
               onTap: () => map.setSelectedAoEColor(entry.value),
               borderRadius: BorderRadius.circular(8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: entry.value.withOpacity(0.85),
+                  color: entry.value.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
                     color: selected ? Colors.white : Colors.black26,
                     width: selected ? 3 : 1,
                   ),
                 ),
-                child: Text(entry.key,
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                child: Text(
+                  entry.key,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             );
           }).toList(),

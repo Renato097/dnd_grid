@@ -308,8 +308,9 @@ class _BattleGridState extends State<BattleGrid> {
   }
 
   AoEData? _previewAoe(MapState map) {
-    if (_action != _GestureAction.drawingAoE || _aoeStartCanvas == null)
+    if (_action != _GestureAction.drawingAoE || _aoeStartCanvas == null) {
       return null;
+    }
     return AoEData(
       id: '__preview__',
       shape: map.selectedAoEShape,
@@ -435,7 +436,7 @@ class _BattleGridState extends State<BattleGrid> {
                         vertical: 1,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.75),
+                        color: Colors.black.withValues(alpha: 0.75),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -480,7 +481,7 @@ class _BattleGridState extends State<BattleGrid> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.8),
+            color: Colors.black.withValues(alpha: 0.8),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: Colors.white24),
           ),
@@ -525,7 +526,7 @@ class _WorldPainter extends CustomPainter {
     final radius = Radius.circular((gap * 0.7).clamp(1, 10));
     final tilePaint = Paint()..style = PaintingStyle.fill;
     final linePaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = Colors.white.withValues(alpha: 0.05)
       ..strokeWidth = 1;
 
     for (int r = 0; r < map.rows; r++) {
@@ -574,12 +575,12 @@ class _WorldPainter extends CustomPainter {
     final path = geometry.buildPath();
 
     final fillPaint = Paint()
-      ..color = aoe.color.withOpacity(preview ? 0.22 : 0.38)
+      ..color = aoe.color.withValues(alpha: preview ? 0.22 : 0.38)
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
 
     final strokePaint = Paint()
-      ..color = (selected ? Colors.white : aoe.color).withOpacity(0.9)
+      ..color = (selected ? Colors.white : aoe.color).withValues(alpha: 0.9)
       ..style = PaintingStyle.stroke
       ..strokeWidth = (selected ? 2.5 : 1.5) / scale;
     canvas.drawPath(path, strokePaint);

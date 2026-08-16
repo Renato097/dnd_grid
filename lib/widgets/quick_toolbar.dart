@@ -23,7 +23,7 @@ class QuickToolbar extends StatelessWidget {
     final hasAoeSelection = map.selectedAoeId != null;
 
     return Material(
-      color: const Color(0xFF1E1E22).withOpacity(0.92),
+      color: const Color(0xFF1E1E22).withValues(alpha: 0.92),
       borderRadius: BorderRadius.circular(14),
       elevation: 4,
       child: Padding(
